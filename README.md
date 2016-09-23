@@ -1,4 +1,4 @@
-## sloth 
+## Sloth - TheGoonies CTF PwnBox
 
 ### Ready
 
