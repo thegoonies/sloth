@@ -53,7 +53,7 @@ Vagrant.configure("2") do |config|
                       privileged: true
 
   config.vm.provision "shell",
-                      inline: "echo -e pwnbox > /etc/hosts ; hostname pwnbox",
+                      inline: "echo -e pwnbox > /etc/hostname ; hostname pwnbox",
                       name: "renaming",
                       preserve_order: true,
                       privileged: true
