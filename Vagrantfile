@@ -53,6 +53,16 @@ Vagrant.configure("2") do |config|
                       privileged: true
 
   config.vm.provision "shell",
+                      inline: "echo alias gdb='gdb -q' >> ~/.bashrc",
+                      preserve_order: true,
+                      privileged: false
+
+  config.vm.provision "shell",
+                      inline: "echo 'export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib' >> ~/.bashrc",
+                      preserve_order: true,
+                      privileged: false
+
+  config.vm.provision "shell",
                       inline: "echo -e pwnbox > /etc/hostname ; hostname pwnbox",
                       name: "renaming",
                       preserve_order: true,
@@ -62,4 +72,5 @@ Vagrant.configure("2") do |config|
                       inline: "echo -e \"\n\nAll good, time to pwn!\n\n\"",
                       name: "success",
                       preserve_order: true
+
 end
