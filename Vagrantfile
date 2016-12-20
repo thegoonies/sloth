@@ -9,9 +9,21 @@
 # $ vagrant up --provision && vagrant ssh
 #
 
+
+$ctftools_installer = <<EOF
+sudo apt-get update
+sudo apt-get -fuy -o Dpkg::Options::='--force-confold' install git
+git clone https://github.com/zardus/ctf-tools.git /home/vagrant/ctf-tools/
+/home/vagrant/ctf-tools/bin/manage-tools -s setup
+EOF
+
+$edit_bashrc = <<EOF
+echo 'export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib' >> ~/.bashrc
+source ~/.bashrc
+EOF
+
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/trusty64"
-  # config.vm.box = "ubuntu/trusty32"
   config.vm.box_check_update = true
   config.vm.network "private_network", type: "dhcp"
   config.vm.network "forwarded_port", guest: 4444, host: 4444
@@ -23,7 +35,12 @@ Vagrant.configure("2") do |config|
                       privileged: true
 
   config.vm.provision "shell",
-                      inline: "apt-get install -y tmux gdb-multiarch gcc-multilib g++-multilib git wget cmake software-properties-common python-pip python3-pip build-essential libssl-dev libffi-dev python-dev",
+                      name: "ctf_tools",
+                      privileged: false,
+                      inline: $ctftools_installer
+
+  config.vm.provision "shell",
+                      inline: "apt-get install -y tmux gdb-multiarch gcc-multilib g++-multilib git wget cmake software-properties-common python-pip python3-pip build-essential libssl-dev libffi-dev python-dev nmap",
                       name: "apt_install_missing",
                       preserve_order: true,
                       privileged: true
@@ -58,7 +75,7 @@ Vagrant.configure("2") do |config|
                       privileged: false
 
   config.vm.provision "shell",
-                      inline: "echo 'export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib' >> ~/.bashrc",
+                      inline: $edit_bashrc,
                       preserve_order: true,
                       privileged: false
 
