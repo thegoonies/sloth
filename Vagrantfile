@@ -70,6 +70,12 @@ Vagrant.configure("2") do |config|
                       privileged: false
 
   config.vm.provision "shell",
+                      inline: "echo 'kernel.yama.ptrace_scope = 0' > /etc/sysctl.d/10-ptrace.conf ; sysctl -p",
+                      name: "enable_ptrace",
+                      preserve_order: true,
+                      privileged: true
+
+  config.vm.provision "shell",
                       inline: "pip2 install --upgrade pwntools",
                       name: "pwntools_install",
                       preserve_order: true,
