@@ -1,9 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 #
-# Use Vagrant to create and populate a CTF combat-ready VM
-#
-# @_hugsy_
+# Build a CTF combat-ready VM in 5 minutes thanks to Vagrant
 #
 # Simply run:
 # $ vagrant up --provision && vagrant ssh
@@ -26,7 +24,7 @@ EOF
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/trusty64"
   config.vm.box_check_update = false
-  config.vm.synced_folder "~/ctf", "/ctf"
+  config.vm.synced_folder "~/ctf", "/ctf", create: true, disabled: false, id: "CTF"
   config.vm.network "private_network", type: "dhcp"
   config.vm.network "forwarded_port", guest: 4444, host: 4444
   config.vm.post_up_message = "
