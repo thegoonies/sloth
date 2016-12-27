@@ -22,7 +22,7 @@ EOF
 
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "ubuntu/trusty64"
+ config.vm.box = "ubuntu/trusty64"
   config.vm.box_check_update = false
   config.vm.synced_folder "~/ctf", "/ctf", create: true, disabled: false, id: "CTF"
   config.vm.network "private_network", type: "dhcp"
@@ -30,10 +30,12 @@ Vagrant.configure("2") do |config|
   config.vm.post_up_message = "
                         _   _                             _ _
  _ ____      ___ __    | |_| |__   ___ _ __ ___      __ _| | |
-| '_ \\ \\ /\\ / / '_ \   | __| '_ \\ / _ \\ '_ ` _ \\    / _` | | |
+| '_ \\ \\ /\\ / / '_ \\   | __| '_ \\ / _ \\ '_ ` _ \\    / _` | | |
 | |_) \\ V  \V /| | | |  | |_| | | |  __/ | | | | |  | (_| | | |
 | .__/ \\_/\\_/ |_| |_|   \\__|_| |_|\\___|_| |_| |_|   \\__,_|_|_|
 |_|
+
+
 
 "
 
