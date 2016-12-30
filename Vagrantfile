@@ -12,21 +12,21 @@ echo 'force_color_prompt=yes' >> ~/.bashrc
 echo 'export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib' >> ~/.bashrc
 echo 'alias gdb="gdb -q"' >> ~/.bashrc
 echo 'alias g="gdb -q"' >> ~/.bashrc
+echo source /root/exploitable/exploitable/exploitable.py >> /root/.gdbinit
 source ~/.bashrc
-echo -e pwnbox | sudo tee /etc/hostname ; sudo hostname pwnbox
-cd /tmp && git clone https://github.com/plasma-disassembler/plasma.git
-cd plasma
-pip3 install -r ./requirements.txt --user && python3 setup.py build_ext --inplace && sudo -H python3 setup.py install
+echo -e sloth | sudo tee /etc/hostname ; sudo hostname sloth
 echo -e "\n\nAll good, time to pwn!\n\n\"
 EOF
 
 
 Vagrant.configure("2") do |config|
- config.vm.box = "ubuntu/trusty64"
+  config.vm.box = "Sliim/kali-2016.2-light-amd64"
   config.vm.box_check_update = false
   config.vm.synced_folder "~/ctf", "/ctf", create: true, disabled: false, id: "CTF"
-  config.vm.network "private_network", type: "dhcp"
   config.vm.network "forwarded_port", guest: 4444, host: 4444
+  config.ssh.private_key_path = "dummy-key"
+  config.ssh.insert_key = true
+  config.ssh.username = "root"
   config.vm.post_up_message = "
                         _   _                             _ _
  _ ____      ___ __    | |_| |__   ___ _ __ ___      __ _| | |
@@ -38,15 +38,14 @@ Vagrant.configure("2") do |config|
 
 
 "
-
   config.vm.provision "shell",
-                      inline: "apt-add-repository ppa:pwntools/binutils; apt-get update",
+                      inline: "export DEBIAN_FRONTEND=noninteractive; apt-get update -qq -y",
                       name: "apt_update",
                       preserve_order: true,
                       privileged: true
 
   config.vm.provision "shell",
-                      inline: "apt-get install -y tmux gdb gdb-multiarch gcc-multilib g++-multilib git wget cmake software-properties-common python-pip python3-pip build-essential libssl-dev libffi-dev python-dev nmap",
+                      inline: "export DEBIAN_FRONTEND=noninteractive; apt-get install -y tmux gdb gdb-multiarch gcc-multilib g++-multilib git wget cmake software-properties-common python-pip python3-pip build-essential libssl-dev libffi-dev python-dev nmap",
                       name: "apt_install_missing_package",
                       preserve_order: true,
                       privileged: true
@@ -58,10 +57,22 @@ Vagrant.configure("2") do |config|
                       privileged: false
 
   config.vm.provision "shell",
+                      inline: "git clone https://github.com/jfoote/exploitable",
+                      name: "git_install_exploitable",
+                      preserve_order: true,
+                      privileged: false
+
+  config.vm.provision "shell",
                       path: "./trinity_install.sh",
                       name: "keystone_capstone_unicorn_install_with_python_bindings",
                       preserve_order: true,
                       privileged: true
+
+  config.vm.provision "shell",
+                      inline: "git clone https://github.com/niklasb/libc-database",
+                      name: "git_install_libcdb",
+                      preserve_order: true,
+                      privileged: false
 
   config.vm.provision "shell",
                       inline: "pip3 install --user --upgrade ropper retdec-python",
