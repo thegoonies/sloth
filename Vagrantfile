@@ -34,9 +34,9 @@ Vagrant.configure("2") do |config|
 | |_) \\ V  \V /| | | |  | |_| | | |  __/ | | | | |  | (_| | | |
 | .__/ \\_/\\_/ |_| |_|   \\__|_| |_|\\___|_| |_| |_|   \\__,_|_|_|
 |_|
-
-
-
+ 
+ 
+ 
 "
   config.vm.provision "shell",
                       inline: "export DEBIAN_FRONTEND=noninteractive; apt-get update -qq -y",
@@ -45,7 +45,7 @@ Vagrant.configure("2") do |config|
                       privileged: true
 
   config.vm.provision "shell",
-                      inline: "export DEBIAN_FRONTEND=noninteractive; apt-get install -y tmux gdb gdb-multiarch gcc-multilib g++-multilib git wget cmake software-properties-common python-pip python3-pip build-essential libssl-dev libffi-dev python-dev nmap",
+                      inline: "export DEBIAN_FRONTEND=noninteractive; apt-get install -y tmux gdb gdb-multiarch gcc-multilib g++-multilib git wget cmake software-properties-common python-pip python3-pip build-essential libssl-dev libffi-dev python-dev nmap qemu",
                       name: "apt_install_missing_package",
                       preserve_order: true,
                       privileged: true
