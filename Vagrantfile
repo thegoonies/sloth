@@ -15,6 +15,14 @@ echo 'alias g="gdb -q"' >> ~/.bashrc
 echo source /root/exploitable/exploitable/exploitable.py >> /root/.gdbinit
 source ~/.bashrc
 echo -e sloth | sudo tee /etc/hostname ; sudo hostname sloth
+sudo cat > /etc/os-release << VAGRANT_HACK
+NAME="Ubuntu"
+VERSION="12.04 LTS, Precise Pangolin"
+ID=ubuntu
+ID_LIKE=debian
+PRETTY_NAME="Ubuntu precise (12.04 LTS)"
+VERSION_ID="12.04"
+VAGRANT_HACK
 echo -e "\n\nAll good, time to pwn!\n\n\"
 EOF
 
