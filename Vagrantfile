@@ -32,6 +32,7 @@ Vagrant.configure("2") do |config|
   config.vm.box_check_update = false
   config.vm.synced_folder "~/ctf", "/ctf", create: true, disabled: false, id: "CTF"
   config.vm.network "forwarded_port", guest: 4444, host: 4444
+  config.vm.network "private_network", type: "dhcp"
   config.ssh.private_key_path = "dummy-key"
   config.ssh.insert_key = true
   config.ssh.username = "root"
@@ -71,19 +72,13 @@ Vagrant.configure("2") do |config|
                       privileged: false
 
   config.vm.provision "shell",
-                      path: "./trinity_install.sh",
-                      name: "keystone_capstone_unicorn_install_with_python_bindings",
-                      preserve_order: true,
-                      privileged: true
-
-  config.vm.provision "shell",
                       inline: "git clone https://github.com/niklasb/libc-database",
                       name: "git_install_libcdb",
                       preserve_order: true,
                       privileged: false
 
   config.vm.provision "shell",
-                      inline: "pip3 install --user --upgrade ropper retdec-python",
+                      inline: "pip3 install --user --upgrade ropper retdec-python capstone unicorn keystone-engine",
                       name: "pip_install_missing",
                       preserve_order: true,
                       privileged: false
