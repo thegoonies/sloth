@@ -90,7 +90,7 @@ Vagrant.configure("2") do |config|
                       privileged: true
 
   config.vm.provision "shell",
-                      inline: "pip2 install --upgrade pwntools",
+                      inline: "pip2 install --upgrade pwntools angr monkeyhex claripy",
                       name: "pwntools_install",
                       preserve_order: true,
                       privileged: true
