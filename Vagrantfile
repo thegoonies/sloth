@@ -12,6 +12,7 @@ echo 'force_color_prompt=yes' >> ~/.bashrc
 echo 'export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib' >> ~/.bashrc
 echo 'alias gdb="gdb -q"' >> ~/.bashrc
 echo 'alias g="gdb -q"' >> ~/.bashrc
+echo 'export PYTHONSTARTUP=~/.pystartup' >> .bashrc 
 echo source /root/exploitable/exploitable/exploitable.py >> /root/.gdbinit
 source ~/.bashrc
 echo -e sloth | sudo tee /etc/hostname ; sudo hostname sloth
@@ -24,6 +25,20 @@ PRETTY_NAME="Ubuntu precise (12.04 LTS)"
 VERSION_ID="12.04"
 VAGRANT_HACK
 echo -e "\n\nAll good, time to pwn!\n\n\"
+cat > ~/.pystartup << PYSTARTUP
+import atexit, os, rlcompleter, readline
+readline.parse_and_bind('tab: complete')
+historyPath = os.environ['HOME'] + "/.pyhistory"
+def save_history(historyPath=historyPath):
+    import readline
+    readline.write_history_file(historyPath)
+    return
+if os.path.exists(historyPath):
+    readline.read_history_file(historyPath)
+atexit.register(save_history)
+del os, atexit, readline, rlcompleter, save_history, historyPath
+PYSTARTUP
+
 EOF
 
 
