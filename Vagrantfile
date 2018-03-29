@@ -7,6 +7,14 @@
 # $ vagrant up --provision && vagrant ssh
 #
 
+$patator = <<EOF
+python3 -m venv patatorenv --without-pip
+source patatorenv/bin/activate
+wget --quiet -O - https://bootstrap.pypa.io/get-pip.py | python3
+pip install patator
+pip install psycopg2-binary # fix warning
+EOF
+
 $finish_install = <<EOF
 cat >> ~/.bashrc << 'BASHRC'
 force_color_prompt=yes
@@ -64,7 +72,7 @@ Vagrant.configure("2") do |config|
                       privileged: true
 
   config.vm.provision "shell",
-                      inline: "export DEBIAN_FRONTEND=noninteractive; apt-get install -y tmux gdb gdb-multiarch gcc-multilib g++-multilib git wget cmake software-properties-common python-pip python3-pip build-essential libssl-dev libffi-dev python-dev ipython3 ipython python-crypto python3-crypto nmap qemu vim ",
+                      inline: "export DEBIAN_FRONTEND=noninteractive; apt-get install -y tmux gdb gdb-multiarch gcc-multilib g++-multilib git wget cmake software-properties-common python-pip python3-pip build-essential libssl-dev libffi-dev python-dev ipython3 ipython python-crypto python3-crypto nmap qemu vim libcurl4-openssl-dev python3-dev ldap-utils libmysqlclient-dev ike-scan unzip default-jdk libsqlite3-dev libsqlcipher-dev",
                       name: "apt_install_essentials",
                       preserve_order: true,
                       privileged: true
@@ -89,7 +97,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "shell",
                       inline: "pip3 install --user --upgrade ropper retdec-python capstone unicorn keystone-engine",
-                      name: "pip_install_missing",
+                      name: "pip_install_gef_deps",
                       preserve_order: true,
                       privileged: false
 
@@ -104,6 +112,12 @@ Vagrant.configure("2") do |config|
                       name: "install_pwntools",
                       preserve_order: true,
                       privileged: true
+
+  config.vm.provision "shell",
+                      inline: $patator,
+                      name: "install_patator",
+                      preserve_order: true,
+                      privileged: false
 
   config.vm.provision "shell",
                       inline: $finish_install,
