@@ -8,23 +8,16 @@
 #
 
 $finish_install = <<EOF
-echo 'force_color_prompt=yes' >> ~/.bashrc
-echo 'export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib' >> ~/.bashrc
-echo 'alias gdb="gdb -q"' >> ~/.bashrc
-echo 'alias g="gdb -q"' >> ~/.bashrc
-echo 'export PYTHONSTARTUP=~/.pystartup' >> .bashrc 
-echo source /root/exploitable/exploitable/exploitable.py >> /root/.gdbinit
+cat >> ~/.bashrc << 'BASHRC'
+force_color_prompt=yes
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
+alias gdb="gdb -q"
+alias g="gdb -q"
+export PYTHONSTARTUP=~/.pystartup
+BASHRC
 source ~/.bashrc
-echo -e sloth | sudo tee /etc/hostname ; sudo hostname sloth
-sudo cat > /etc/os-release << VAGRANT_HACK
-NAME="Ubuntu"
-VERSION="12.04 LTS, Precise Pangolin"
-ID=ubuntu
-ID_LIKE=debian
-PRETTY_NAME="Ubuntu precise (12.04 LTS)"
-VERSION_ID="12.04"
-VAGRANT_HACK
-echo -e "\n\nAll good, time to pwn!\n\n\"
+echo 'source /root/exploitable/exploitable/exploitable.py' >> ~/.gdbinit
+echo -e sloth | sudo tee /etc/hostname; sudo hostname sloth
 cat > ~/.pystartup << PYSTARTUP
 import atexit, os, rlcompleter, readline
 readline.parse_and_bind('tab: complete')
@@ -39,18 +32,20 @@ atexit.register(save_history)
 del os, atexit, readline, rlcompleter, save_history, historyPath
 PYSTARTUP
 
+echo -e "\n\nAll good, time to pwn!\n\n\"
 EOF
 
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "Sliim/kali-2016.2-light-amd64"
+  # prevent TTY error messages
+  config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
+
+  config.vm.box = "ubuntu/xenial64"
   config.vm.box_check_update = false
   config.vm.synced_folder "~/ctf", "/ctf", create: true, disabled: false, id: "CTF"
   config.vm.network "forwarded_port", guest: 4444, host: 4444
   config.vm.network "private_network", type: "dhcp"
-  config.ssh.private_key_path = "dummy-key"
-  config.ssh.insert_key = true
-  config.ssh.username = "root"
+
   config.vm.post_up_message = "
                         _   _                             _ _
  _ ____      ___ __    | |_| |__   ___ _ __ ___      __ _| | |
@@ -69,13 +64,13 @@ Vagrant.configure("2") do |config|
                       privileged: true
 
   config.vm.provision "shell",
-                      inline: "export DEBIAN_FRONTEND=noninteractive; apt-get install -y tmux gdb gdb-multiarch gcc-multilib g++-multilib git wget cmake software-properties-common python-pip python3-pip build-essential libssl-dev libffi-dev python-dev nmap qemu",
-                      name: "apt_install_missing_package",
+                      inline: "export DEBIAN_FRONTEND=noninteractive; apt-get install -y tmux gdb gdb-multiarch gcc-multilib g++-multilib git wget cmake software-properties-common python-pip python3-pip build-essential libssl-dev libffi-dev python-dev ipython3 ipython python-crypto python3-crypto nmap qemu vim ",
+                      name: "apt_install_essentials",
                       preserve_order: true,
                       privileged: true
 
   config.vm.provision "shell",
-                      inline: "wget -q -O- https://github.com/hugsy/gef/raw/master/gef.sh | sh",
+                      inline: "wget -q -O- https://github.com/hugsy/gef/raw/master/scripts/gef.sh | sh",
                       name: "install_gef",
                       preserve_order: true,
                       privileged: false
@@ -106,7 +101,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "shell",
                       inline: "pip2 install --upgrade pwntools angr monkeyhex claripy",
-                      name: "pwntools_install",
+                      name: "install_pwntools",
                       preserve_order: true,
                       privileged: true
 
