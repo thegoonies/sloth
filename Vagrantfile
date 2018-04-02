@@ -7,6 +7,24 @@
 # $ vagrant up --provision && vagrant ssh
 #
 
+$install_pip = <<EOF
+wget --quiet -O - https://bootstrap.pypa.io/get-pip.py | python3
+wget --quiet -O - https://bootstrap.pypa.io/get-pip.py | python2
+
+pip3 install --upgrade ropper retdec-python capstone unicorn keystone-engine pwntools monkeyhex claripy
+pip2 install --upgrade angr
+
+echo /usr/local/lib/python3.5/dist-packages/usr/lib/python3/dist-packages/capstone > /etc/ld.so.conf.d/capstone.conf
+ldconfig
+EOF
+
+$clone_repos = <<EOF
+for repo in https://github.com/jfoote/exploitable https://github.com/niklasb/libc-database; do
+  rm -fr "$(basename "$repo")"
+  git clone "$repo"
+done
+EOF
+
 $patator = <<EOF
 python3 -m venv patatorenv --without-pip
 source patatorenv/bin/activate
@@ -54,6 +72,12 @@ Vagrant.configure("2") do |config|
   config.vm.network "forwarded_port", guest: 4444, host: 4444
   config.vm.network "private_network", type: "dhcp"
 
+  # prevent error "virtual memory exhausted: Cannot allocate memory" during keystone cmake build
+  config.vm.provider :virtualbox do |v|
+    v.customize ["modifyvm", :id, "--memory", 4096]
+  end
+
+
   config.vm.post_up_message = "
                         _   _                             _ _
  _ ____      ___ __    | |_| |__   ___ _ __ ___      __ _| | |
@@ -72,7 +96,7 @@ Vagrant.configure("2") do |config|
                       privileged: true
 
   config.vm.provision "shell",
-                      inline: "export DEBIAN_FRONTEND=noninteractive; apt-get install -y tmux gdb gdb-multiarch gcc-multilib g++-multilib git wget cmake software-properties-common python-pip python3-pip build-essential libssl-dev libffi-dev python-dev ipython3 ipython python-crypto python3-crypto nmap qemu vim libcurl4-openssl-dev python3-dev ldap-utils libmysqlclient-dev ike-scan unzip default-jdk libsqlite3-dev libsqlcipher-dev",
+                      inline: "export DEBIAN_FRONTEND=noninteractive; apt-get install -y tmux gdb gdb-multiarch gcc-multilib g++-multilib git wget cmake software-properties-common build-essential libssl-dev libffi-dev python-dev ipython3 ipython python-crypto python3-crypto nmap qemu vim libcurl4-openssl-dev python3-dev ldap-utils libmysqlclient-dev ike-scan unzip default-jdk libsqlite3-dev libsqlcipher-dev",
                       name: "apt_install_essentials",
                       preserve_order: true,
                       privileged: true
@@ -84,22 +108,10 @@ Vagrant.configure("2") do |config|
                       privileged: false
 
   config.vm.provision "shell",
-                      inline: "git clone https://github.com/jfoote/exploitable",
-                      name: "git_install_exploitable",
+                      inline: $install_pip,
+                      name: "install_pip",
                       preserve_order: true,
-                      privileged: false
-
-  config.vm.provision "shell",
-                      inline: "git clone https://github.com/niklasb/libc-database",
-                      name: "git_install_libcdb",
-                      preserve_order: true,
-                      privileged: false
-
-  config.vm.provision "shell",
-                      inline: "pip3 install --user --upgrade ropper retdec-python capstone unicorn keystone-engine",
-                      name: "pip_install_gef_deps",
-                      preserve_order: true,
-                      privileged: false
+                      privileged: true
 
   config.vm.provision "shell",
                       inline: "echo 'kernel.yama.ptrace_scope = 0' > /etc/sysctl.d/10-ptrace.conf ; sysctl -p",
@@ -108,10 +120,10 @@ Vagrant.configure("2") do |config|
                       privileged: true
 
   config.vm.provision "shell",
-                      inline: "pip2 install --upgrade pwntools angr monkeyhex claripy",
-                      name: "install_pwntools",
+                      inline: $clone_repos,
+                      name: "clone_repos",
                       preserve_order: true,
-                      privileged: true
+                      privileged: false
 
   config.vm.provision "shell",
                       inline: $patator,
