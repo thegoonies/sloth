@@ -11,8 +11,8 @@ $install_pip = <<EOF
 wget --quiet -O - https://bootstrap.pypa.io/get-pip.py | python3
 wget --quiet -O - https://bootstrap.pypa.io/get-pip.py | python2
 
-pip3 install --upgrade ropper retdec-python capstone unicorn keystone-engine pwntools monkeyhex claripy
-pip2 install --upgrade angr
+pip3 install --upgrade ropper retdec-python capstone unicorn keystone-engine pwntools monkeyhex claripy pipenv
+pip2 install --upgrade angr pwntools
 
 echo /usr/local/lib/python3.5/dist-packages/usr/lib/python3/dist-packages/capstone > /etc/ld.so.conf.d/capstone.conf
 ldconfig
@@ -65,9 +65,8 @@ EOF
 Vagrant.configure("2") do |config|
   # prevent TTY error messages
   config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
-
-  config.vm.box = "ubuntu/xenial64"
-  config.vm.box_check_update = false
+  config.vm.box = "ubuntu/bionic64"
+  config.vm.box_check_update = true
   config.vm.synced_folder "~/ctf", "/ctf", create: true, disabled: false, id: "CTF"
   config.vm.network "forwarded_port", guest: 4444, host: 4444
   config.vm.network "private_network", type: "dhcp"
