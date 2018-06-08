@@ -73,8 +73,14 @@ Vagrant.configure("2") do |config|
 
   # prevent error "virtual memory exhausted: Cannot allocate memory" during keystone cmake build
   config.vm.provider :virtualbox do |v|
-    v.customize ["modifyvm", :id, "--memory", 4096]
+    v.cpus = 1
+    v.memory = 4096
+    # v.customize ["modifyvm", :id, "--memory", 4096]
   end
+  
+  config.ssh.forward_x11 = true
+  config.ssh.forward_agent = true
+
 
 
   config.vm.post_up_message = "
@@ -95,7 +101,7 @@ Vagrant.configure("2") do |config|
                       privileged: true
 
   config.vm.provision "shell",
-                      inline: "export DEBIAN_FRONTEND=noninteractive; apt-get install -y tmux gdb gdb-multiarch gcc-multilib g++-multilib git wget cmake software-properties-common build-essential libssl-dev libffi-dev python-dev ipython3 ipython python-crypto python3-crypto nmap qemu vim libcurl4-openssl-dev python3-dev ldap-utils libmysqlclient-dev ike-scan unzip default-jdk libsqlite3-dev libsqlcipher-dev",
+                      inline: "export DEBIAN_FRONTEND=noninteractive; apt-get install -y xauth xterm firefox tmux gdb gdb-multiarch gcc-multilib g++-multilib git wget cmake software-properties-common build-essential libssl-dev libffi-dev python-dev ipython3 ipython python-crypto python3-crypto nmap qemu vim libcurl4-openssl-dev python3-dev ldap-utils libmysqlclient-dev ike-scan unzip default-jdk libsqlite3-dev libsqlcipher-dev",
                       name: "apt_install_essentials",
                       preserve_order: true,
                       privileged: true
